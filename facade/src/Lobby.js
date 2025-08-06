@@ -2,7 +2,7 @@ import { useParams } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import { db } from './firebase';
 import { ref, onValue, set, update, get } from 'firebase/database';
-import GameBoard, { gameBoard } from './Gameboard';
+import GameBoard from './Gameboard';
 
 function Lobby({ user }) {
     const { code } = useParams();
@@ -11,8 +11,6 @@ function Lobby({ user }) {
 
     useEffect(() => {
         const lobbyRef = ref(db, `lobbies/${code}`);
-        const hostRef = ref(db, `lobbies/${code}/host`);
-        const guestRef = ref(db, `lobbies/${code}/guest`);
 
         const unsub = onValue(lobbyRef, async (snap) => {
             const data = snap.val();
@@ -40,23 +38,13 @@ function Lobby({ user }) {
                     status: 'started',
                     turn: 'host'
                 });
-                await update(hostRef, {
-                    hand: [['ace', false], ['king', false], ['queen', false], ['jack', false], ['joker1', false], ['joker2', false]],
-                    active1: [],
-                    active2: []
-                });
-                await update(guestRef, {
-                    hand: [['ace', false], ['king', false], ['queen', false], ['jack', false], ['joker1', false], ['joker2', false]],
-                    active1: [],
-                    active2: []
-                });
                 setRole('guest');
                 setStatus('started');
+                setHands();
             } else {
                 setStatus('full');
             }
         });
-
         return () => unsub();
     }, [code, user.uid]);
 
@@ -65,6 +53,22 @@ function Lobby({ user }) {
     }
     if (status === 'joining') {
         return <div>Joining lobby...</div>;
+    }
+
+    async function setHands() {
+        const hostRef = ref(db, `lobbies/${code}/host`);
+        const guestRef = ref(db, `lobbies/${code}/guest`);
+        const initialHand = [['ace', false], ['king', false], ['queen', false], ['jack', false], ['joker1', false], ['joker2', false]];
+        await update(hostRef, {
+            hand: initialHand,
+            active1: [],
+            active2: []
+        });
+        await update(guestRef, {
+            hand: initialHand,
+            active1: [],
+            active2: []
+        });
     }
 
     return (

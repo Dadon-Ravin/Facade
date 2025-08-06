@@ -6,6 +6,7 @@ import Card from './Card';
 function GameBoard({ code, role }) {
     const [turn, setTurn] = useState(null);
     const [hand, setHand] = useState([]);
+    const [opponentHand, setOpponentHand] = useState([]);
 
     useEffect(() => {
         const gameRef = ref(db, `lobbies/${code}`);
@@ -17,6 +18,10 @@ function GameBoard({ code, role }) {
             const playerHand = data?.[role]?.hand;
             if (playerHand) {
                 setHand(playerHand);
+            }
+            const opponentHand = data?.[role === 'host' ? 'guest' : 'host']?.hand;
+            if (opponentHand) {
+                setOpponentHand(opponentHand);
             }
         });
         return () => unsubscrtibe();
@@ -43,7 +48,7 @@ function GameBoard({ code, role }) {
     const displayOpponentHand = () => {
         return (
             <div style={{ display: 'flex', gap: '10px' }}>
-                {hand.map((card, idx) => (
+                {opponentHand.map((card, idx) => (
                     <Card key={idx} card={card} role={role} side={'otherRole'} />
                 ))}
             </div>
