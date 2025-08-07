@@ -1,11 +1,14 @@
 import { useEffect, useState } from 'react';
 import { ref, onValue, update } from 'firebase/database';
-import { db } from './firebase';
-import Card from './Card';
+import { db } from '../firebase';
+import Hand from './Hand';
 
 function GameBoard({ code, role }) {
+
+
+
     const [turn, setTurn] = useState(null);
-    const [hand, setHand] = useState([]);
+    const [playerHand, setPlayerHand] = useState([]);
     const [opponentHand, setOpponentHand] = useState([]);
 
     useEffect(() => {
@@ -17,7 +20,7 @@ function GameBoard({ code, role }) {
             }
             const playerHand = data?.[role]?.hand;
             if (playerHand) {
-                setHand(playerHand);
+                setPlayerHand(playerHand);
             }
             const opponentHand = data?.[role === 'host' ? 'guest' : 'host']?.hand;
             if (opponentHand) {
@@ -27,39 +30,20 @@ function GameBoard({ code, role }) {
         return () => unsubscrtibe();
     }, [code])
 
-    const handleTurnChange = () => {
-        if (role !== turn) return;
-
-        const nextTurn = turn === 'host' ? 'guest' : 'host';
-        const gameRef = ref(db, `lobbies/${code}`);
-        update(gameRef, { turn: nextTurn })
-    };
-
     const displayPlayerHand = () => {
         return (
-            <div style={{ display: 'flex', gap: '10px' }}>
-                {hand.map((card, idx) => (
-                    <Card key={idx} card={card} role={role} side={role} />
-                ))}
-            </div>
+            <Hand hand={playerHand} playerRole={role} ownerRole={role} />
         );
     };
 
     const displayOpponentHand = () => {
         return (
-            <div style={{ display: 'flex', gap: '10px' }}>
-                {opponentHand.map((card, idx) => (
-                    <Card key={idx} card={card} role={role} side={'otherRole'} />
-                ))}
-            </div>
+            <Hand hand={opponentHand} playerRole={role} ownerRole={role === 'host' ? 'guest' : 'host'} />
         );
     };
 
     return (
         <div style={{ marginTop: 20 }}>
-            <button onClick={handleTurnChange} disabled={role !== turn}>
-                {turn}
-            </button>
             {displayOpponentHand()}
             {displayPlayerHand()}
         </div>

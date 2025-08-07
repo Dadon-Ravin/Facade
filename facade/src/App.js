@@ -3,7 +3,7 @@ import { BrowserRouter as Router, Routes, Route, useNavigate } from 'react-route
 import { auth, db } from './firebase';
 import { signInAnonymously, onAuthStateChanged } from 'firebase/auth';
 import { ref, set, push, get } from 'firebase/database';
-import Lobby from './Lobby';
+import Lobby from './GameComponents/Lobby';
 
 function Home({ user }) {
   const [codeInput, setCodeInput] = useState('');
