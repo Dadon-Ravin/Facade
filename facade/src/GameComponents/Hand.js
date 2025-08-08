@@ -4,7 +4,7 @@ function Hand({ hand, playerRole, ownerRole }) {
     const displayHand = () => {
         return Object.entries(hand).map(([key, card]) => (
             <Card
-                key={card}
+                key={key}
                 cardOwnerRole={ownerRole}
                 playerRole={playerRole}
                 card={card}

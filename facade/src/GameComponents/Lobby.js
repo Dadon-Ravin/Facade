@@ -12,39 +12,50 @@ function Lobby({ user }) {
     useEffect(() => {
         const lobbyRef = ref(db, `lobbies/${code}`);
 
-        const unsub = onValue(lobbyRef, async (snap) => {
+        (async () => {
+            const snap = await get(lobbyRef);
             const data = snap.val();
 
             if (!data) {
-                // Create new lobby
                 await set(lobbyRef, {
-                    hostid: user.uid,
-                    host: user.uid,
+                    host: {
+                        hostid: user.uid
+                    },
+                    guest: {
+                        guestid: 'none'
+                    },
                     status: 'waiting'
-                });
+                })
                 setRole('host');
                 setStatus('waiting');
-            } else if (data.hostid === user.uid) {
+            } else if (data.host.hostid === user.uid) {
                 setRole('host');
                 setStatus(data.status);
-            } else if (data.guestid === user.uid) {
+            } else if (data.guest.guestid === user.uid) {
                 setRole('guest');
                 setStatus(data.status);
-            } else if (!data.guest) {
+            } else if (data.guest.guestid === 'none') {
                 // Join as guest
                 await update(lobbyRef, {
-                    guestid: user.uid,
-                    guest: user.uid,
+                    guest: {
+                        guestid: user.uid
+                    },
                     status: 'started',
-                    turn: 'host'
                 });
                 setRole('guest');
                 setStatus('started');
-                setHands();
+                await setHands();
             } else {
                 setStatus('full');
             }
+        })();
+        const unsub = onValue(lobbyRef, (snap) => {
+            const data = snap.val();
+            if (data) {
+                setStatus(data.status);
+            }
         });
+
         return () => unsub();
     }, [code, user.uid]);
 
