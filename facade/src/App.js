@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, useNavigate } from 'react-router-dom';
 import { auth, db } from './firebase';
 import { signInAnonymously, onAuthStateChanged } from 'firebase/auth';
-import { ref, set, push, get } from 'firebase/database';
+import { ref, get } from 'firebase/database';
 import Lobby from './GameComponents/Lobby';
 
 function Home({ user }) {

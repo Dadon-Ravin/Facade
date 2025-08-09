@@ -40,11 +40,11 @@ function Lobby({ user }) {
                     guest: {
                         guestid: user.uid
                     },
-                    status: 'started',
+                    status: 'selection',
                 });
                 setRole('guest');
-                setStatus('started');
-                await setHands();
+                setStatus('selection');
+                await setupGame();
             } else {
                 setStatus('full');
             }
@@ -66,7 +66,7 @@ function Lobby({ user }) {
         return <div>Joining lobby...</div>;
     }
 
-    async function setHands() {
+    async function setupGame() {
         const hostRef = ref(db, `lobbies/${code}/host`);
         const guestRef = ref(db, `lobbies/${code}/guest`);
         const initialHand = {
@@ -80,12 +80,14 @@ function Lobby({ user }) {
         await update(hostRef, {
             hand: initialHand,
             active1: null,
-            active2: null
+            active2: null,
+            selectionSubmitted: false
         });
         await update(guestRef, {
             hand: initialHand,
             active1: null,
-            active2: null
+            active2: null,
+            selectionSubmitted: false
         });
     }
 
@@ -94,7 +96,7 @@ function Lobby({ user }) {
             <h2>Lobby Code: {code}</h2>
             <p>Status: {status}</p>
             <p>You are the {role}</p>
-            {status === 'started' && <GameBoard code={code} role={role} />}
+            {status === 'selection' && <GameBoard code={code} role={role} status={status} />}
             {status === 'waiting' && role === 'host' && <p>Waiting for guest to join...</p>}
         </div>
     );

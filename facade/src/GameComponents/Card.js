@@ -1,4 +1,4 @@
-function Card({ cardOwnerRole, playerRole, card }) {
+function Card({ cardOwnerRole, playerRole, card, selected = false, handleCardClick = null }) {
     let color = playerRole === 'host' ? 'red' : 'black';
     let rank = card.rank;
     let isRevealed = card.isRevealed;
@@ -12,12 +12,24 @@ function Card({ cardOwnerRole, playerRole, card }) {
         }
     }
 
-    return (
-        <img
-            style={{ width: '100px', height: 'auto' }}
-            src={`/cards/${color}/${color}_${display}.svg`} alt={`${color} ${display}`}
-        />
+    const borderStyle =
+        selected ?
+            { boxShadow: '0 0 10px 1px gold' } :
+            {};
 
+    const onCardClick = () => {
+        if (handleCardClick) {
+            handleCardClick();
+        }
+    }
+    return (
+        <div>
+            <img
+                style={{ width: '100px', height: 'auto', ...borderStyle }}
+                src={`/cards/${color}/${color}_${display}.svg`} alt={`${color} ${display}`}
+                onClick={onCardClick}
+            />
+        </div>
     )
 }
 export default Card;
