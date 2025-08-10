@@ -2,39 +2,12 @@ import { useState } from 'react';
 import { ref, update, set } from 'firebase/database';
 import { db } from '../firebase';
 import Hand from './Hand';
-
-function Slot({ card, role, onClick }) {
-    const color = role === 'host' ? 'red' : 'black'
-    return (
-        <div
-            onClick={onClick}
-            style={{
-                width: "90px",
-                height: "120px",
-                border: "2px dashed gray",
-                borderRadius: "8px",
-                display: "flex",
-                justifyContent: "center",
-                alignItems: "center",
-                backgroundColor: card ? "#eee" : "transparent",
-                cursor: "pointer",
-            }}
-        >
-            {card ? (
-                <img
-                    src={`/cards/${color}/${color}_${card.rank}.svg`}
-                    alt={`${role === 'host' ? 'red' : 'black'} ${card.rank}`}
-                    style={{ width: '100px', height: 'auto' }}
-                />
-            ) : (
-                "+"
-            )}
-        </div>
-    );
-}
+import Card from './Card';
+import Slot from './Slot';
 
 function SelectionPhase({ code, role, hand, active1 = null, active2 = null, selectionSubmitted }) {
     const [selectedCardKey, setSelectedCardKey] = useState(null);
+    // selects card in hand when clicked
     const handleCardClick = (cardKey) => {
         setSelectedCardKey(cardKey);
     }
@@ -50,7 +23,9 @@ function SelectionPhase({ code, role, hand, active1 = null, active2 = null, sele
         // If a card is already in the slot, return it to the hand
         const existingCard = slot === 'active1' ? active1 : active2;
         if (existingCard) {
-            await update(ref(db, `lobbies/${code}/${role}/hand`), { [existingCard.key]: existingCard.card });
+            await update(ref(db, `lobbies/${code}/${role}/hand`), {
+                [existingCard.key]: existingCard.card
+            });
         }
 
         // Place selected card in the slot
@@ -72,14 +47,40 @@ function SelectionPhase({ code, role, hand, active1 = null, active2 = null, sele
         });
     }
 
-    const bothSlotsFilled = active1 && active2;
+    const displayActives = () => {
+        console.log(active1)
+        return (
+            <div style={{ display: 'flex', justifyContent: 'center', gap: '10px' }}>
+                {active1 ? (
+                    <Card
+                        ownerRole={role}
+                        playerRole={role}
+                        card={active1?.card}
+                        onClick={() => handleSlotClick("active1")}
+                    />
+                ) : (
+                    <Slot onClick={handleSlotClick("active1")} />
+                )}
+                {active2 ? (
+                    <Card
+                        ownerRole={role}
+                        playerRole={role}
+                        card={active2.card}
+                        onClick={() => handleSlotClick("active2")}
+                    />
+                ) : (
+                    <Slot onClick={handleSlotClick("active2")} />
+                )}
+            </div>
+        )
+    }
 
+    const bothSlotsFilled = active1 && active2;
     return (
         <div style={{ textAlign: 'center' }}>
             <h3>Selection Phase</h3>
             <div style={{ display: 'flex', justifyContent: 'center', gap: '10px' }}>
-                <Slot card={active1?.card} role={role} onClick={() => handleSlotClick("active1")} />
-                <Slot card={active2?.card} role={role} onClick={() => handleSlotClick("active2")} />
+                {displayActives()}
             </div>
             <br />
             <Hand
@@ -87,7 +88,7 @@ function SelectionPhase({ code, role, hand, active1 = null, active2 = null, sele
                 playerRole={role}
                 ownerRole={role}
                 selectedCardKey={selectedCardKey}
-                handleCardClick={handleCardClick}
+                onClick={handleCardClick}
             />
             <button
                 onClick={handleSubmit}

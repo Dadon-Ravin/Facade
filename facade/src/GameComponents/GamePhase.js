@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { ref, update, set } from 'firebase/database';
 import { db } from '../firebase';
 
-function PlayingArea({ code, role, hand, active1, active2, opponentHand, opponentActive1, opponentActive2, turn }) {
+function GamePhase({ code, role, hand, active1, active2, opponentHand, opponentActive1, opponentActive2, turn }) {
     const opponentRole = role === 'host' ? 'guest' : 'host';
     const isTurn = role === turn;
 
@@ -86,4 +86,4 @@ function PlayingArea({ code, role, hand, active1, active2, opponentHand, opponen
     )
 };
 
-export default PlayingArea;
+export default GamePhase;
