@@ -27,7 +27,7 @@ function Slot({ card, role, onClick }) {
                     style={{ width: '100px', height: 'auto' }}
                 />
             ) : (
-                "Empty"
+                "+"
             )}
         </div>
     );
@@ -37,7 +37,6 @@ function SelectionPhase({ code, role, hand, active1 = null, active2 = null, sele
     const [selectedCardKey, setSelectedCardKey] = useState(null);
     const handleCardClick = (cardKey) => {
         setSelectedCardKey(cardKey);
-        console.log(`Selected card: ${cardKey}`);
     }
 
     const handleSlotClick = async (slot) => {
@@ -51,7 +50,6 @@ function SelectionPhase({ code, role, hand, active1 = null, active2 = null, sele
         // If a card is already in the slot, return it to the hand
         const existingCard = slot === 'active1' ? active1 : active2;
         if (existingCard) {
-            console.log('existing card ', existingCard)
             await update(ref(db, `lobbies/${code}/${role}/hand`), { [existingCard.key]: existingCard.card });
         }
 

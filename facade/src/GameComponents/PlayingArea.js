@@ -1,12 +1,13 @@
 import Hand from './Hand';
 import Card from './Card';
+import { useState } from 'react';
 
 function PlayingArea({ role, hand, active1, active2, opponentHand, opponentActive1, opponentActive2 }) {
-    const opponentRole = role === 'host' ? 'guest' : 'host'
+    const opponentRole = role === 'host' ? 'guest' : 'host';
 
     const displayPlayerHand = () => {
         return (
-            <Hand hand={hand} playerRole={role} ownerRole={role} />
+            <Hand hand={hand} playerRole={role} ownerRole={role} selectedCardKey={selectedCardKey} handleCardClick={handleHandClick} />
         );
     };
 
@@ -14,6 +15,15 @@ function PlayingArea({ role, hand, active1, active2, opponentHand, opponentActiv
         return (
             <Hand hand={opponentHand} playerRole={role} ownerRole={opponentRole} />
         );
+    }
+
+    const [selectedCardKey, setSelectedCardKey] = useState(null);
+    const handleHandClick = async (cardKey) => {
+        setSelectedCardKey(cardKey);
+    }
+
+    const handleActiveClick = async (cardKey) => {
+
     }
 
     const displayPlayerActives = () => {
