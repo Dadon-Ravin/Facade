@@ -24,7 +24,8 @@ function Lobby({ user }) {
                     guest: {
                         guestid: 'none'
                     },
-                    status: 'waiting'
+                    status: 'waiting',
+                    turn: 'host'
                 })
                 setRole('host');
                 setStatus('waiting');

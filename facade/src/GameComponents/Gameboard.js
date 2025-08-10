@@ -8,10 +8,12 @@ function GameBoard({ code, role, status }) {
     const opponentRole = role === 'host' ? 'guest' : 'host'
     const [playerHand, setPlayerHand] = useState([]);
     const [opponentHand, setOpponentHand] = useState([]);
-    const [active1, setActive1] = useState(null)
-    const [active2, setActive2] = useState(null)
-    const [opponentActive1, setOpponentActive1] = useState(null)
-    const [opponentActive2, setOpponentActive2] = useState(null)
+    const [active1, setActive1] = useState(null);
+    const [active2, setActive2] = useState(null);
+    const [opponentActive1, setOpponentActive1] = useState(null);
+    const [opponentActive2, setOpponentActive2] = useState(null);
+
+    const [turn, setTurn] = useState(null);
 
     const [playerSelectionSubmitted, setPlayerSelectionSubmitted] = useState(false)
     const [opponentSelectionSubmitted, setOpponentSelectionSubmitted] = useState(false)
@@ -41,6 +43,7 @@ function GameBoard({ code, role, status }) {
             setActive2(data?.[role]?.active2 || null);
             setOpponentActive1(data?.[opponentRole]?.active1 || null);
             setOpponentActive2(data?.[opponentRole]?.active2 || null);
+            setTurn(data?.turn);
 
             setPlayerSelectionSubmitted(data?.[role]?.selectionSubmitted);
             setOpponentSelectionSubmitted(data?.[opponentRole]?.selectionSubmitted);
@@ -50,6 +53,7 @@ function GameBoard({ code, role, status }) {
 
     if (playerSelectionSubmitted && opponentSelectionSubmitted) {
         status = 'started'
+
     }
 
     if (!handsLoaded) {
@@ -71,6 +75,7 @@ function GameBoard({ code, role, status }) {
     return (
         <div style={{ marginTop: 20 }}>
             <PlayingArea
+                code={code}
                 role={role}
                 hand={playerHand}
                 active1={active1.card}
@@ -78,6 +83,7 @@ function GameBoard({ code, role, status }) {
                 opponentHand={opponentHand}
                 opponentActive1={opponentActive1.card}
                 opponentActive2={opponentActive2.card}
+                turn={turn}
             />
         </div>
     );

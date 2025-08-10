@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { ref, update, set, push } from 'firebase/database';
+import { ref, update, set } from 'firebase/database';
 import { db } from '../firebase';
 import Hand from './Hand';
 
