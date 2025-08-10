@@ -1,15 +1,20 @@
 import { useEffect, useState } from 'react';
 import { ref, onValue } from 'firebase/database';
 import { db } from '../firebase';
-import Hand from './Hand';
 import SelectionPhase from './SelectionPhase';
+import PlayingArea from './PlayingArea';
 
 function GameBoard({ code, role, status }) {
+    const opponentRole = role === 'host' ? 'guest' : 'host'
     const [playerHand, setPlayerHand] = useState([]);
     const [opponentHand, setOpponentHand] = useState([]);
     const [active1, setActive1] = useState(null)
     const [active2, setActive2] = useState(null)
-    const [selectionSubmitted, setSelectionSubmitted] = useState(false)
+    const [opponentActive1, setOpponentActive1] = useState(null)
+    const [opponentActive2, setOpponentActive2] = useState(null)
+
+    const [playerSelectionSubmitted, setPlayerSelectionSubmitted] = useState(false)
+    const [opponentSelectionSubmitted, setOpponentSelectionSubmitted] = useState(false)
 
     const [handsLoaded, setHandsLoaded] = useState(true);
 
@@ -25,35 +30,32 @@ function GameBoard({ code, role, status }) {
             } else {
                 handsLoaded = false;
             }
-            const opponentHand = data?.[role === 'host' ? 'guest' : 'host']?.hand;
+            const opponentHand = data?.[opponentRole]?.hand;
             if (opponentHand) {
                 setOpponentHand(opponentHand);
             } else {
                 handsLoaded = false;
             }
             setHandsLoaded(handsLoaded);
-
             setActive1(data?.[role]?.active1 || null);
             setActive2(data?.[role]?.active2 || null);
-            setSelectionSubmitted(data?.[role]?.selectionSubmitted);
+            setOpponentActive1(data?.[opponentRole]?.active1 || null);
+            setOpponentActive2(data?.[opponentRole]?.active2 || null);
+
+            setPlayerSelectionSubmitted(data?.[role]?.selectionSubmitted);
+            setOpponentSelectionSubmitted(data?.[opponentRole]?.selectionSubmitted);
         });
         return () => unsubscrtibe();
-    }, [code, role])
+    }, [role])
 
-    const displayPlayerHand = () => {
-        return (
-            <Hand hand={playerHand} playerRole={role} ownerRole={role} />
-        );
-    };
+    if (playerSelectionSubmitted && opponentSelectionSubmitted) {
+        status = 'started'
+    }
 
-    const displayOpponentHand = () => {
-        return (
-            <Hand hand={opponentHand} playerRole={role} ownerRole={role === 'host' ? 'guest' : 'host'} />
-        );
-    };
     if (!handsLoaded) {
         return <div>Loading Cards...</div>;
     }
+
     if (status === 'selection') {
         return (
             <SelectionPhase
@@ -62,14 +64,21 @@ function GameBoard({ code, role, status }) {
                 hand={playerHand}
                 active1={active1}
                 active2={active2}
-                selectionSubmitted={selectionSubmitted}
+                selectionSubmitted={playerSelectionSubmitted}
             />
         )
     }
     return (
         <div style={{ marginTop: 20 }}>
-            {displayOpponentHand()}
-            {displayPlayerHand()}
+            <PlayingArea
+                role={role}
+                hand={playerHand}
+                active1={active1.card}
+                active2={active2.card}
+                opponentHand={opponentHand}
+                opponentActive1={opponentActive1.card}
+                opponentActive2={opponentActive2.card}
+            />
         </div>
     );
 }

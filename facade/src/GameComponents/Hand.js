@@ -8,7 +8,7 @@ function Hand({ hand, playerRole, ownerRole, selectedCardKey = null, handleCardC
         return Object.entries(hand).map(([key, card]) => (
             <Card
                 key={key}
-                cardOwnerRole={ownerRole}
+                ownerRole={ownerRole}
                 playerRole={playerRole}
                 card={card}
                 selected={selectedCardKey === key}
@@ -18,7 +18,7 @@ function Hand({ hand, playerRole, ownerRole, selectedCardKey = null, handleCardC
     };
 
     return (
-        <div style={{ display: 'flex', gap: '10px' }}>
+        <div style={{ display: 'flex', gap: '10px', justifyContent: 'center' }}>
             {displayHand()}
         </div>
     )

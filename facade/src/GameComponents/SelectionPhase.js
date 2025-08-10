@@ -9,7 +9,7 @@ function Slot({ card, role, onClick }) {
         <div
             onClick={onClick}
             style={{
-                width: "80px",
+                width: "90px",
                 height: "120px",
                 border: "2px dashed gray",
                 borderRadius: "8px",
@@ -79,10 +79,11 @@ function SelectionPhase({ code, role, hand, active1 = null, active2 = null, sele
     return (
         <div style={{ textAlign: 'center' }}>
             <h3>Selection Phase</h3>
-            <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+            <div style={{ display: 'flex', justifyContent: 'center', gap: '10px' }}>
                 <Slot card={active1?.card} role={role} onClick={() => handleSlotClick("active1")} />
                 <Slot card={active2?.card} role={role} onClick={() => handleSlotClick("active2")} />
             </div>
+            <br />
             <Hand
                 hand={hand}
                 playerRole={role}
