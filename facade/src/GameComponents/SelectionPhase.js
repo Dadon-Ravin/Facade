@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { ref, update, set } from 'firebase/database';
+import { useState, useEffect } from 'react';
+import { ref, update } from 'firebase/database';
 import { db } from '../firebase';
 import Hand from './Hand';
 
@@ -33,43 +33,72 @@ function Slot({ card, role, onClick }) {
     );
 }
 
-function SelectionPhase({ code, role, hand, active1 = null, active2 = null, selectionSubmitted }) {
+function SelectionPhase({ code, role, hand: remoteHand, active1: remoteActive1 = null, active2: remoteActive2 = null, selectionSubmitted }) {
+    // Locate state for slots and hand
+    const [hand, setHand] = useState(remoteHand || {});
+    const [active1, setActive1] = useState(remoteActive1);
+    const [active2, setActive2] = useState(remoteActive2);
     const [selectedCardKey, setSelectedCardKey] = useState(null);
+
+    // Sync local state when remote changes (Firebase updates)
+    useEffect(() => {
+        setHand(remoteHand || {});
+    }, [remoteHand]);
+
+    useEffect(() => {
+        setActive1(remoteActive1);
+    }, [remoteActive1]);
+
+    useEffect(() => {
+        setActive2(remoteActive2)
+    }, [remoteActive2]);
+
     const handleCardClick = (cardKey) => {
         setSelectedCardKey(cardKey);
-    }
-
-    const handleSlotClick = async (slot) => {
-        // If no card is selected, return
-        // Else, get reference to the selected card
-        if (!selectedCardKey) {
-            return;
-        }
-        const selectedCard = hand[selectedCardKey];
-
-        // If a card is already in the slot, return it to the hand
-        const existingCard = slot === 'active1' ? active1 : active2;
-        if (existingCard) {
-            await update(ref(db, `lobbies/${code}/${role}/hand`), { [existingCard.key]: existingCard.card });
-        }
-
-        // Place selected card in the slot
-        await update(ref(db, `lobbies/${code}/${role}/${slot}`), {
-            key: selectedCardKey,
-            card: selectedCard
-        });
-
-        // Remove the selected card from hand
-        await set(ref(db, `lobbies/${code}/${role}/hand/${selectedCardKey}`), null);
-
-        // Reset selected card
-        setSelectedCardKey(null);
     };
 
-    const handleSubmit = async () => {
-        await update(ref(db, `lobbies/${code}/${role}`), {
-            selectionSubmitted: true
+    const handleSlotClick = async (slot) => {
+        if (!selectedCardKey) return;
+
+        const selectedCard = hand[selectedCardKey];
+        if (!selectedCard) return;
+
+        // Determine card in selected slot
+        const currentSlot = slot === 'active1' ? active1 : active2;
+
+        // Update local state with new active card
+        if (slot === 'active1') {
+            setActive1({ key: selectedCardKey, card: selectedCard });
+        } else {
+            setActive2({ key: selectedCardKey, card: selectedCard });
+        }
+
+        // Remove new active card from local hand
+        setHand(prev => {
+            const updated = { ...prev };
+            delete updated[selectedCardKey];
+            return updated;
         });
+
+        // Push updates to Firebase
+        const updates = {
+            [`${role}/${slot}`]: { key: selectedCardKey, card: selectedCard },
+            [`${role}/hand/${selectedCardKey}`]: null
+        };
+
+        // If slot already had a card, return it to hand
+        if (currentSlot) {
+            updates[`${role}/hand/${currentSlot.key}`] = currentSlot.card;
+        }
+
+        await update(ref(db, `lobbies/${code}`), updates);
+
+        // Clear selection
+        setSelectedCardKey(null);
+    }
+
+    const handleSubmit = async () => {
+        await update(ref(db, `lobbies/${code}/${role}`), { selectionSubmitted: true });
     }
 
     const bothSlotsFilled = active1 && active2;

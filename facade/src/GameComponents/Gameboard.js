@@ -1,64 +1,77 @@
 import { useEffect, useState } from 'react';
-import { ref, onValue } from 'firebase/database';
+import { ref, onValue, set } from 'firebase/database';
 import { db } from '../firebase';
 import SelectionPhase from './SelectionPhase';
-import PlayingArea from './PlayingArea';
+import GamePhase from './GamePhase';
 
-function GameBoard({ code, role, status }) {
+function GameBoard({ code, role }) {
     const opponentRole = role === 'host' ? 'guest' : 'host'
+
     const [playerHand, setPlayerHand] = useState([]);
     const [opponentHand, setOpponentHand] = useState([]);
     const [active1, setActive1] = useState(null);
     const [active2, setActive2] = useState(null);
     const [opponentActive1, setOpponentActive1] = useState(null);
     const [opponentActive2, setOpponentActive2] = useState(null);
-
     const [turn, setTurn] = useState(null);
 
     const [playerSelectionSubmitted, setPlayerSelectionSubmitted] = useState(false)
     const [opponentSelectionSubmitted, setOpponentSelectionSubmitted] = useState(false)
+    const [status, setStatus] = useState('selection');
 
-    const [handsLoaded, setHandsLoaded] = useState(true);
-
+    // Subscribe to player state
     useEffect(() => {
-        const gameRef = ref(db, `lobbies/${code}`);
-        const unsubscrtibe = onValue(gameRef, (snapshot) => {
-            const data = snapshot.val();
-            let handsLoaded = true;
-
-            const playerHand = data?.[role]?.hand;
-            if (playerHand) {
-                setPlayerHand(playerHand);
-            } else {
-                handsLoaded = false;
-            }
-            const opponentHand = data?.[opponentRole]?.hand;
-            if (opponentHand) {
-                setOpponentHand(opponentHand);
-            } else {
-                handsLoaded = false;
-            }
-            setHandsLoaded(handsLoaded);
-            setActive1(data?.[role]?.active1 || null);
-            setActive2(data?.[role]?.active2 || null);
-            setOpponentActive1(data?.[opponentRole]?.active1 || null);
-            setOpponentActive2(data?.[opponentRole]?.active2 || null);
-            setTurn(data?.turn);
-
-            setPlayerSelectionSubmitted(data?.[role]?.selectionSubmitted);
-            setOpponentSelectionSubmitted(data?.[opponentRole]?.selectionSubmitted);
+        const playerRef = ref(db, `lobbies/${code}/${role}`);
+        const unsub = onValue(playerRef, snap => {
+            const val = snap.val();
+            if (!val) return;
+            setPlayerHand(val.hand || []);
+            setActive1(val.active1 || null);
+            setActive2(val.active2 || null);
+            setPlayerSelectionSubmitted(Boolean(val.selectionSubmitted));
         });
-        return () => unsubscrtibe();
-    }, [role])
+        return () => unsub();
+    }, [code, role]);
 
-    if (playerSelectionSubmitted && opponentSelectionSubmitted) {
-        status = 'started'
+    // Subscribe to opponent state
+    useEffect(() => {
+        const opponentRef = ref(db, `lobbies/${code}/${opponentRole}`);
+        const unsub = onValue(opponentRef, snap => {
+            const val = snap.val();
+            if (!val) return;
+            setOpponentHand(val.hand || []);
+            setOpponentActive1(val.active1 || null);
+            setOpponentActive2(val.active2 || null);
+            setOpponentSelectionSubmitted(Boolean(val.selectionSubmitted));
+        });
+        return () => unsub();
+    }, [code, opponentRole]);
 
-    }
+    // Subscribe to turn
+    useEffect(() => {
+        const turnRef = ref(db, `lobbies/${code}/turn`);
+        const unsub = onValue(turnRef, snap => {
+            setTurn(snap.val());
+        });
+        return () => unsub();
+    }, [code]);
 
-    if (!handsLoaded) {
-        return <div>Loading Cards...</div>;
-    }
+    // Subscribe to status
+    useEffect(() => {
+        const statusRef = ref(db, `lobbies/${code}/status`);
+        const unsub = onValue(statusRef, snap => {
+            setStatus(snap.val());
+        });
+        return () => unsub();
+    }, [code])
+
+    // Update status in Firebase once both selections are submitted
+    useEffect(() => {
+        if (playerSelectionSubmitted && opponentSelectionSubmitted && status === 'selection') {
+            const statusRef = ref(db, `lobbies/${code}/status`);
+            set(statusRef, 'started');
+        }
+    }, [playerSelectionSubmitted, opponentSelectionSubmitted, code, status]);
 
     if (status === 'selection') {
         return (
@@ -74,17 +87,7 @@ function GameBoard({ code, role, status }) {
     }
     return (
         <div style={{ marginTop: 20 }}>
-            <PlayingArea
-                code={code}
-                role={role}
-                hand={playerHand}
-                active1={active1.card}
-                active2={active2.card}
-                opponentHand={opponentHand}
-                opponentActive1={opponentActive1.card}
-                opponentActive2={opponentActive2.card}
-                turn={turn}
-            />
+            <GamePhase />
         </div>
     );
 }

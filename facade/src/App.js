@@ -79,7 +79,7 @@ function App() {
         setUser(firebaseUser);
       }
       else {
-        signInAnonymously(auth);
+        signInAnonymously(auth).catch(console.error);
       }
     });
     return () => unsubscribe();

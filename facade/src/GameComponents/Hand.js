@@ -1,27 +1,25 @@
 import Card from './Card';
 
 function Hand({ hand, playerRole, ownerRole, selectedCardKey = null, handleCardClick = null }) {
-    const displayHand = () => {
-        if (!hand) {
-            return null;
-        }
-        return Object.entries(hand).map(([key, card]) => (
-            <Card
-                key={key}
-                ownerRole={ownerRole}
-                playerRole={playerRole}
-                card={card}
-                selected={selectedCardKey === key}
-                handleCardClick={() => handleCardClick(key)}
-            />
-        ));
-    };
+    if (!hand) return null;
 
     return (
         <div style={{ display: 'flex', gap: '10px', justifyContent: 'center' }}>
-            {displayHand()}
+            {Object.entries(hand).map(([key, card]) => {
+                if (!card) return null;
+                return (
+                    <Card
+                        key={key}
+                        ownerRole={ownerRole}
+                        playerRole={playerRole}
+                        card={card}
+                        selected={selectedCardKey === key}
+                        handleCardClick={() => handleCardClick?.(key)}
+                    />
+                );
+            })}
         </div>
-    )
+    );
 }
 
 export default Hand;

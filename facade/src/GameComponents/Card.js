@@ -1,35 +1,28 @@
 function Card({ ownerRole, playerRole, card, selected = false, handleCardClick = null }) {
-    let color = playerRole === 'host' ? 'red' : 'black';
-    let rank = card.rank;
-    let isRevealed = card.isRevealed;
-    const ownsCard = ownerRole === playerRole;
+    if (!card) return null;
 
-    let display = rank;
+    const ownsCard = ownerRole === playerRole;
+    let color = playerRole === 'host' ? 'red' : 'black'
+
+    let display = card.rank;
     if ((!ownsCard)) {
         color = playerRole === 'host' ? 'black' : 'red';
-        if (!isRevealed) {
+        if (!card.isRevealed) {
             display = 'back';
         }
     }
 
-    const borderStyle =
-        selected ?
-            { boxShadow: '0 0 10px 1px gold' } :
-            {};
-
-    const onCardClick = () => {
-        if (handleCardClick) {
-            handleCardClick();
-        }
-    }
     return (
-        <div>
-            <img
-                style={{ width: '100px', height: 'auto', ...borderStyle }}
-                src={`/cards/${color}/${color}_${display}.svg`} alt={`${color} ${display}`}
-                onClick={onCardClick}
-            />
-        </div>
+        <img
+            src={`/cards/${color}/${color}_${display}.svg`}
+            alt={`${color} ${display}`}
+            style={{
+                width: '100px',
+                height: 'auto',
+                ...(selected && { boxShadow: '0 0 10px 1px gold' })
+            }}
+            onClick={() => handleCardClick?.()}
+        />
     )
 }
 export default Card;
