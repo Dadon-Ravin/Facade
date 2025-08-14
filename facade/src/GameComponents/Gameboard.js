@@ -87,7 +87,18 @@ function GameBoard({ code, role }) {
     }
     return (
         <div style={{ marginTop: 20 }}>
-            <GamePhase />
+            <GamePhase
+                code={code}
+                role={role}
+                opponentRole={opponentRole}
+                playerHand={playerHand}
+                active1={active1}
+                active2={active2}
+                opponentHand={opponentHand}
+                opponentActive1={opponentActive1}
+                opponentActive2={opponentActive2}
+                turn={turn}
+            />
         </div>
     );
 }

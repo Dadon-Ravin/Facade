@@ -4,7 +4,7 @@ function Hand({ hand, playerRole, ownerRole, selectedCardKey = null, handleCardC
     if (!hand) return null;
 
     return (
-        <div style={{ display: 'flex', gap: '10px', justifyContent: 'center' }}>
+        <div style={{ display: 'flex', gap: '10px', justifyContent: 'center', paddingBottom: '10px' }}>
             {Object.entries(hand).map(([key, card]) => {
                 if (!card) return null;
                 return (

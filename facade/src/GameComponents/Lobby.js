@@ -3,7 +3,6 @@ import { useState, useEffect } from 'react';
 import { db } from '../firebase';
 import { ref, onValue, set, update, get } from 'firebase/database';
 import GameBoard from './Gameboard';
-import GamePhase from './GamePhase';
 
 function Lobby({ user }) {
     const { code } = useParams();

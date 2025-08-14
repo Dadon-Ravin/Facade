@@ -35,14 +35,14 @@ function Slot({ card, role, onClick }) {
 
 function SelectionPhase({ code, role, hand: remoteHand, active1: remoteActive1 = null, active2: remoteActive2 = null, selectionSubmitted }) {
     // Locate state for slots and hand
-    const [hand, setHand] = useState(remoteHand || {});
+    const [hand, setHand] = useState(remoteHand);
     const [active1, setActive1] = useState(remoteActive1);
     const [active2, setActive2] = useState(remoteActive2);
     const [selectedCardKey, setSelectedCardKey] = useState(null);
 
     // Sync local state when remote changes (Firebase updates)
     useEffect(() => {
-        setHand(remoteHand || {});
+        setHand(remoteHand);
     }, [remoteHand]);
 
     useEffect(() => {
