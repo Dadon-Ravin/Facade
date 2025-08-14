@@ -15,6 +15,7 @@ function GamePhase({ code, role, opponentRole, playerHand: remotePlayerHand, act
     const [opponentActive2, setOpponentActive2] = useState(remoteOpponentActive2);
     const [turn, setTurn] = useState(remoteTurn);
 
+    const [activeAbility, setActiveAbility] = useState(null);
     const [selectedCardKey, setSelectedCardKey] = useState(null);
 
     // Sync local state when remote changes
@@ -98,10 +99,19 @@ function GamePhase({ code, role, opponentRole, playerHand: remotePlayerHand, act
 
     function handleActiveAbility() {
         return (
-            <div>
-                <button onClick={handleJackClick}>J</button>
-                <button onClick={handleQueenClick}>Q</button>
-                <button onClick={handleKingClick}>K</button>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
+                <button style={{ height: '25px', width: '30px' }}
+                    onClick={handleJackClick}>
+                    J
+                </button>
+                <button style={{ height: '25px', width: '30px' }}
+                    onClick={handleQueenClick}>
+                    Q
+                </button>
+                <button style={{ height: '25px', width: '30px' }}
+                    onClick={handleKingClick}>
+                    K
+                </button>
             </div>
         )
     }
@@ -120,7 +130,7 @@ function GamePhase({ code, role, opponentRole, playerHand: remotePlayerHand, act
         if (selectedCardKey) {
             handleSwap(active);
         } else {
-            handleActiveAbility();
+            setActiveAbility(active);
         }
     }
 
@@ -149,6 +159,7 @@ function GamePhase({ code, role, opponentRole, playerHand: remotePlayerHand, act
     function displayActiveCards() {
         return (
             <div style={{ display: 'flex', gap: '10px', justifyContent: 'center', paddingBottom: '10px' }}>
+                {activeAbility === 'active1' && handleActiveAbility()}
                 <Card
                     ownerRole={role}
                     playerRole={role}
@@ -161,6 +172,7 @@ function GamePhase({ code, role, opponentRole, playerHand: remotePlayerHand, act
                     card={active2?.card}
                     handleCardClick={() => handleActiveClick('active2')}
                 />
+                {activeAbility === 'active2' && handleActiveAbility()}
             </div>
         )
     }
