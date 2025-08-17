@@ -50,7 +50,11 @@ function Lobby({ user }) {
                     host: { hostid: user.uid },
                     guest: { guestid: 'none' },
                     status: 'waiting',
-                    turn: 'host'
+                    turn: 'host',
+                    action: {
+                        card: 'none',
+                        phase: 'none'
+                    }
                 });
                 setRole('host');
                 setStatus('wating');

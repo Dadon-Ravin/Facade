@@ -18,6 +18,7 @@ function GameBoard({ code, role }) {
     const [playerSelectionSubmitted, setPlayerSelectionSubmitted] = useState(false)
     const [opponentSelectionSubmitted, setOpponentSelectionSubmitted] = useState(false)
     const [status, setStatus] = useState('selection');
+    const [action, setAction] = useState({});
 
     // Subscribe to player state
     useEffect(() => {
@@ -65,6 +66,15 @@ function GameBoard({ code, role }) {
         return () => unsub();
     }, [code])
 
+    // Subscribe to action
+    useEffect(() => {
+        const actionRef = ref(db, `lobbies/${code}/action`);
+        const unsub = onValue(actionRef, snap => {
+            setAction(snap.val());
+        });
+        return () => unsub();
+    }, [code])
+
     // Update status in Firebase once both selections are submitted
     useEffect(() => {
         if (playerSelectionSubmitted && opponentSelectionSubmitted && status === 'selection') {
@@ -98,6 +108,7 @@ function GameBoard({ code, role }) {
                 opponentActive1={opponentActive1}
                 opponentActive2={opponentActive2}
                 turn={turn}
+                action={action}
             />
         </div>
     );
