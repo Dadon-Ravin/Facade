@@ -138,6 +138,7 @@ function GamePhase({ code, role, opponentRole, playerHand: remotePlayerHand, act
             return;
         }
         setSelectedCardKey(prevKey => prevKey === cardKey ? null : cardKey);
+        setActiveAbility(null);
     }
 
     const handleActiveClick = (active) => {
@@ -146,8 +147,9 @@ function GamePhase({ code, role, opponentRole, playerHand: remotePlayerHand, act
         }
         if (selectedCardKey) {
             handleSwap(active);
-        } else {
-            setActiveAbility(active);
+        }
+        else {
+            setActiveAbility(activeKey => activeKey === active ? null : active);
         }
     }
 
@@ -176,7 +178,7 @@ function GamePhase({ code, role, opponentRole, playerHand: remotePlayerHand, act
     function displayActiveCards() {
         return (
             <div style={{ display: 'flex', gap: '10px', justifyContent: 'center', paddingBottom: '10px' }}>
-                {activeAbility === 'active1' && handleActiveAbility()}
+                {activeAbility === 'active1' && turn === role && handleActiveAbility()}
                 <Card
                     ownerRole={role}
                     playerRole={role}
@@ -189,7 +191,7 @@ function GamePhase({ code, role, opponentRole, playerHand: remotePlayerHand, act
                     card={active2?.card}
                     handleCardClick={() => handleActiveClick('active2')}
                 />
-                {activeAbility === 'active2' && handleActiveAbility()}
+                {activeAbility === 'active2' && turn === role && handleActiveAbility()}
             </div>
         )
     }
@@ -200,13 +202,13 @@ function GamePhase({ code, role, opponentRole, playerHand: remotePlayerHand, act
                 <Card
                     ownerRole={opponentRole}
                     playerRole={role}
-                    card={active1?.card}
+                    card={opponentActive1?.card}
                     selected={action.phase === 'action pushed' && turn === opponentRole && activeAbility === 'active1'}
                 />
                 <Card
                     ownerRole={opponentRole}
                     playerRole={role}
-                    card={active2?.card}
+                    card={opponentActive2?.card}
                     selected={action.phase === 'action pushed' && turn === opponentRole && activeAbility === 'active2'}
                 />
             </div>
@@ -216,7 +218,7 @@ function GamePhase({ code, role, opponentRole, playerHand: remotePlayerHand, act
     function displayChallengePrompt() {
         return (
             <div style={{ display: 'flex', justifyContent: 'center' }}>
-                {(action.phase === 'action pushed' && turn === opponentRole) && <ChallengePrompt action={action} code={code} activeAbility={activeAbility} />}
+                {(action.phase === 'action pushed' && turn === opponentRole) && <ChallengePrompt action={action} code={code} activeAbility={activeAbility} role={role} opponentHand={opponentHand} opponentActive1={opponentActive1} opponentActive2={opponentActive2} />}
                 {(action.phase === 'accepted' && action.card === 'jack' && turn === opponentRole) && <p>Choose a card from your hand to reveal</p>}
             </div>
         )
