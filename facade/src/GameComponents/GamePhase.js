@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { ref, update, set } from 'firebase/database';
 import { db } from '../firebase';
 import ChallengePrompt from './ChallengePrompt';
+import ActionButton from './ActionButton';
 
 
 function GamePhase({ code, role, opponentRole, playerHand: remotePlayerHand, active1: remoteActive1, active2: remoteActive2, opponentHand: remoteOpponentHand, opponentActive1: remoteOpponentActive1, opponentActive2: remoteOpponentActive2, turn: remoteTurn, action: remoteAction }) {
@@ -17,7 +18,7 @@ function GamePhase({ code, role, opponentRole, playerHand: remotePlayerHand, act
     const [turn, setTurn] = useState(remoteTurn);
     const [action, setAction] = useState(remoteTurn);
 
-    const [activeAbility, setActiveAbility] = useState(null);
+    const [selectActive, setSelectActive] = useState(null);
     const [selectedCardKey, setSelectedCardKey] = useState(null);
 
     // Sync local state when remote changes
@@ -91,7 +92,9 @@ function GamePhase({ code, role, opponentRole, playerHand: remotePlayerHand, act
     }
 
     async function handleJackReveal(cardKey) {
+        console.log(cardKey);
         if (turn === role || action.card !== 'jack' || action.phase !== 'accepted') return;
+        if (playerHand[cardKey].isRevealed === true) return;
 
         await update(ref(db, `lobbies/${code}/${role}/hand/${cardKey}`), { isRevealed: true });
         await set(ref(db, `lobbies/${code}/action/phase`), 'none');
@@ -111,40 +114,9 @@ function GamePhase({ code, role, opponentRole, playerHand: remotePlayerHand, act
         await set(ref(db, `lobbies/${code}/turn`), role);
     }
 
-    const handleJackClick = async () => {
-        await set(ref(db, `lobbies/${code}/action/card`), 'jack');
-        await set(ref(db, `lobbies/${code}/action/phase`), 'action pushed');
-        await set(ref(db, `lobbies/${code}/action/active`), activeAbility);
-    }
-
-    const handleQueenClick = async () => {
-        await set(ref(db, `lobbies/${code}/action/card`), 'queen')
-        await set(ref(db, `lobbies/${code}/action/phase`), 'action pushed')
-        await set(ref(db, `lobbies/${code}/action/active`), activeAbility);
-    }
-
-    const handleKingClick = async () => {
-        await set(ref(db, `lobbies/${code}/action/card`), 'king')
-        await set(ref(db, `lobbies/${code}/action/phase`), 'action pushed')
-        await set(ref(db, `lobbies/${code}/action/active`), activeAbility);
-    }
-
-    function handleActiveAbility() {
+    function handleSelectActive() {
         return (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
-                <button style={{ height: '25px', width: '30px' }}
-                    onClick={handleJackClick}>
-                    J
-                </button>
-                <button style={{ height: '25px', width: '30px' }}
-                    onClick={handleQueenClick}>
-                    Q
-                </button>
-                <button style={{ height: '25px', width: '30px' }}
-                    onClick={handleKingClick}>
-                    K
-                </button>
-            </div>
+            <ActionButton code={code} selectActive={selectActive} />
         )
     }
 
@@ -153,7 +125,7 @@ function GamePhase({ code, role, opponentRole, playerHand: remotePlayerHand, act
             return;
         }
         setSelectedCardKey(prevKey => prevKey === cardKey ? null : cardKey);
-        setActiveAbility(null);
+        setSelectActive(null);
     }
 
     const handleActiveClick = (active) => {
@@ -164,7 +136,7 @@ function GamePhase({ code, role, opponentRole, playerHand: remotePlayerHand, act
             handleSwap(active);
         }
         else {
-            setActiveAbility(activeKey => activeKey === active ? null : active);
+            setSelectActive(activeKey => activeKey === active ? null : active);
         }
     }
 
@@ -205,21 +177,44 @@ function GamePhase({ code, role, opponentRole, playerHand: remotePlayerHand, act
 
     function displayActiveCards() {
         return (
-            <div style={{ display: 'flex', gap: '10px', justifyContent: 'center', paddingBottom: '10px' }}>
-                {activeAbility === 'active1' && turn === role && handleActiveAbility()}
-                <Card
-                    ownerRole={role}
-                    playerRole={role}
-                    card={active1?.card}
-                    handleCardClick={() => handleActiveClick('active1')}
-                />
-                <Card
-                    ownerRole={role}
-                    playerRole={role}
-                    card={active2?.card}
-                    handleCardClick={() => handleActiveClick('active2')}
-                />
-                {activeAbility === 'active2' && turn === role && handleActiveAbility()}
+            <div style={{ display: 'flex', justifyContent: 'center', position: 'relative' }}>
+                <div style={{ display: 'flex', gap: '10px', justifyContent: 'center', position: 'relative', paddingBottom: '10px' }}>
+                    <Card
+                        ownerRole={role}
+                        playerRole={role}
+                        card={active1?.card}
+                        handleCardClick={() => handleActiveClick('active1')}
+                    />
+                    <Card
+                        ownerRole={role}
+                        playerRole={role}
+                        card={active2?.card}
+                        handleCardClick={() => handleActiveClick('active2')}
+                    />
+                    {selectActive === 'active1' && turn === role && (
+                        <div style={{
+                            position: 'absolute',
+                            right: '100%',
+                            marginRight: '10px',
+                            top: '50%',
+                            transform: 'translateY(-50%)'
+                        }}>
+                            {handleSelectActive()}
+                        </div>
+                    )}
+
+                    {selectActive === 'active2' && turn === role && (
+                        <div style={{
+                            position: 'absolute',
+                            left: '100%',
+                            marginLeft: '10px',
+                            top: '50%',
+                            transform: 'translateY(-50%)',
+                        }}>
+                            {handleSelectActive()}
+                        </div>
+                    )}
+                </div>
             </div>
         )
     }
@@ -231,13 +226,13 @@ function GamePhase({ code, role, opponentRole, playerHand: remotePlayerHand, act
                     ownerRole={opponentRole}
                     playerRole={role}
                     card={opponentActive1?.card}
-                    selected={action.phase === 'action pushed' && turn === opponentRole && activeAbility === 'active1'}
+                    selected={action.phase === 'action pushed' && turn === opponentRole && selectActive === 'active1'}
                 />
                 <Card
                     ownerRole={opponentRole}
                     playerRole={role}
                     card={opponentActive2?.card}
-                    selected={action.phase === 'action pushed' && turn === opponentRole && activeAbility === 'active2'}
+                    selected={action.phase === 'action pushed' && turn === opponentRole && selectActive === 'active2'}
                 />
             </div>
         )
@@ -247,7 +242,7 @@ function GamePhase({ code, role, opponentRole, playerHand: remotePlayerHand, act
         return (
             <div style={{ display: 'flex', justifyContent: 'center' }}>
                 {(action.phase === 'action pushed' && turn === opponentRole) && <ChallengePrompt action={action} code={code} role={role} opponentHand={opponentHand} opponentActive1={opponentActive1} opponentActive2={opponentActive2} />}
-                {(action.phase === 'accepted' && action.card === 'jack' && turn === opponentRole) && <p>Choose a card from your hand to reveal</p>}
+                {(action.phase === 'accepted' && action.card === 'jack' && turn === opponentRole) && <p>Choose an unrevealed card from your hand to reveal</p>}
             </div>
         )
     }
