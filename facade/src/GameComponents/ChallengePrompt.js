@@ -1,15 +1,13 @@
 import { ref, set } from 'firebase/database'
 import { db } from '../firebase'
 
-function ChallengePrompt({ code, action, activeAbility, role, opponentHand, opponentActive1, opponentActive2 }) {
+function ChallengePrompt({ code, action, role, opponentHand, opponentActive1, opponentActive2 }) {
     async function handleAccept() {
-        console.log('Action Accepted')
         await set(ref(db, `lobbies/${code}/action/phase`), 'accepted')
     }
 
     async function handleQueenAccept() {
         for (var key of Object.keys(opponentHand)) {
-            console.log(key + '->' + opponentHand[key].rank);
             if (opponentHand[key].isRevealed) {
                 opponentHand[key].isRevealed = false;
             }
@@ -31,14 +29,20 @@ function ChallengePrompt({ code, action, activeAbility, role, opponentHand, oppo
     }
 
     async function handleChallenge() {
-        await set(ref(db, `lobbies/${code}/action/phase`), 'challenge')
+        let opponentCard = (action.active === 'active1' ? opponentActive1 : opponentActive2);
+        console.log(opponentCard.card.rank, " posing as ", action.card);
+        if (action.card === opponentCard.card.rank) {
+            await set(ref(db, `lobbies/${code}/action/phase`), 'challenge fail')
+        } else {
+            await set(ref(db, `lobbies/${code}/action/phase`), 'challenge success')
+        }
     }
 
     return (
         <div style={{
             justifyContent: 'center', border: "2px solid black", height: '100px', width: '350px'
         }}>
-            <p style={{ display: 'flex', justifyContent: 'center' }}>Your opponent is attempting to use {activeAbility} as a {action.card}</p>
+            <p style={{ display: 'flex', justifyContent: 'center' }}>Your opponent is attempting to use {action.active} as a {action.card}</p>
             <div style={{ display: 'flex', justifyContent: 'center', gap: '10px' }}>
                 <button onClick={action.card === 'queen' ? handleQueenAccept : handleAccept}>Accept</button>
                 <button onClick={handleChallenge}>Challenge</button>

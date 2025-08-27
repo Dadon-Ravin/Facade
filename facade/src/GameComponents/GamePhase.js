@@ -98,20 +98,35 @@ function GamePhase({ code, role, opponentRole, playerHand: remotePlayerHand, act
         await set(ref(db, `lobbies/${code}/action/card`), 'none');
         await set(ref(db, `lobbies/${code}/turn`), role);
     }
+    async function handleChallengeSuccess(cardKey) {
+        await set(ref(db, `lobbies/${code}/${role}/hand/${cardKey}`), null);
+        await set(ref(db, `lobbies/${code}/action/phase`), 'none');
+        await set(ref(db, `lobbies/${code}/action/card`), 'none');
+        await set(ref(db, `lobbies/${code}/turn`), opponentRole);
+    }
+    async function handleChallengeFail(cardKey) {
+        await set(ref(db, `lobbies/${code}/${role}/hand/${cardKey}`), null);
+        await set(ref(db, `lobbies/${code}/action/phase`), 'none');
+        await set(ref(db, `lobbies/${code}/action/card`), 'none');
+        await set(ref(db, `lobbies/${code}/turn`), role);
+    }
 
     const handleJackClick = async () => {
         await set(ref(db, `lobbies/${code}/action/card`), 'jack');
         await set(ref(db, `lobbies/${code}/action/phase`), 'action pushed');
+        await set(ref(db, `lobbies/${code}/action/active`), activeAbility);
     }
 
     const handleQueenClick = async () => {
         await set(ref(db, `lobbies/${code}/action/card`), 'queen')
         await set(ref(db, `lobbies/${code}/action/phase`), 'action pushed')
+        await set(ref(db, `lobbies/${code}/action/active`), activeAbility);
     }
 
     const handleKingClick = async () => {
         await set(ref(db, `lobbies/${code}/action/card`), 'king')
         await set(ref(db, `lobbies/${code}/action/phase`), 'action pushed')
+        await set(ref(db, `lobbies/${code}/action/active`), activeAbility);
     }
 
     function handleActiveAbility() {
@@ -154,13 +169,26 @@ function GamePhase({ code, role, opponentRole, playerHand: remotePlayerHand, act
     }
 
     function displayPlayerHand() {
+        let handClick = null;
+        if (turn === opponentRole && action.phase === 'accepted' && action.card === 'jack') {
+            handClick = handleJackReveal
+        }
+        else if (turn === role && action.phase === 'challenge success') {
+            handClick = handleChallengeSuccess
+        }
+        else if (turn === opponentRole && action.phase === 'challenge fail') {
+            handClick = handleChallengeFail
+        }
+        else {
+            handClick = handleHandClick
+        }
         return (
             <Hand
                 hand={playerHand}
                 playerRole={role}
                 ownerRole={role}
                 selectedCardKey={selectedCardKey}
-                handleCardClick={(turn === opponentRole && action.phase === 'accepted' && action.card === 'jack') ? handleJackReveal : handleHandClick}
+                handleCardClick={handClick}
             />
         )
     }
@@ -218,8 +246,26 @@ function GamePhase({ code, role, opponentRole, playerHand: remotePlayerHand, act
     function displayChallengePrompt() {
         return (
             <div style={{ display: 'flex', justifyContent: 'center' }}>
-                {(action.phase === 'action pushed' && turn === opponentRole) && <ChallengePrompt action={action} code={code} activeAbility={activeAbility} role={role} opponentHand={opponentHand} opponentActive1={opponentActive1} opponentActive2={opponentActive2} />}
+                {(action.phase === 'action pushed' && turn === opponentRole) && <ChallengePrompt action={action} code={code} role={role} opponentHand={opponentHand} opponentActive1={opponentActive1} opponentActive2={opponentActive2} />}
                 {(action.phase === 'accepted' && action.card === 'jack' && turn === opponentRole) && <p>Choose a card from your hand to reveal</p>}
+            </div>
+        )
+    }
+
+    function displayChallengeFail() {
+        return (
+            <div style={{ display: 'flex', justifyContent: 'center' }}>
+                {(action.phase === 'challenge fail' && turn === opponentRole) && <p>Challenge Failed, choose card to kill</p>}
+                {(action.phase === 'challenge fail' && turn === role) && <p>Opponent challenged, waiting for them to kill a card</p>}
+            </div>
+        )
+    }
+
+    function displayChallengeSuccess() {
+        return (
+            <div style={{ display: 'flex', justifyContent: 'center' }}>
+                {(action.phase === 'challenge success' && turn === role) && <p>You were Challenged, choose card to kill</p>}
+                {(action.phase === 'challenge success' && turn === opponentRole) && <p>Challenge successful, waiting for opponent to kill a card</p>}
             </div>
         )
     }
@@ -232,6 +278,8 @@ function GamePhase({ code, role, opponentRole, playerHand: remotePlayerHand, act
             {displayActiveCards()}
             {displayPlayerHand()}
             {displayChallengePrompt()}
+            {displayChallengeFail()}
+            {displayChallengeSuccess()}
         </div>
     )
 
