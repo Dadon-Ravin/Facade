@@ -53,7 +53,8 @@ function Lobby({ user }) {
                     turn: 'host',
                     action: {
                         card: 'none',
-                        phase: 'none'
+                        phase: 'none',
+                        active: 'none'
                     }
                 });
                 setRole('host');
