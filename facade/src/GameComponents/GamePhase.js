@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { ref, update, set } from 'firebase/database';
 import { db } from '../firebase';
 import ChallengePrompt from './ChallengePrompt';
+import ActionButton from './ActionButton';
 
 
 function GamePhase({ code, role, opponentRole, playerHand: remotePlayerHand, active1: remoteActive1, active2: remoteActive2, opponentHand: remoteOpponentHand, opponentActive1: remoteOpponentActive1, opponentActive2: remoteOpponentActive2, turn: remoteTurn, action: remoteAction }) {
@@ -17,7 +18,7 @@ function GamePhase({ code, role, opponentRole, playerHand: remotePlayerHand, act
     const [turn, setTurn] = useState(remoteTurn);
     const [action, setAction] = useState(remoteTurn);
 
-    const [activeAbility, setActiveAbility] = useState(null);
+    const [selectActive, setSelectActive] = useState(null);
     const [selectedCardKey, setSelectedCardKey] = useState(null);
 
     // Sync local state when remote changes
@@ -90,72 +91,91 @@ function GamePhase({ code, role, opponentRole, playerHand: remotePlayerHand, act
         setSelectedCardKey(null);
     }
 
+    // When a card in the hand is clicked during the jack's action, reveal that card and pass turn
     async function handleJackReveal(cardKey) {
+        console.log(cardKey);
         if (turn === role || action.card !== 'jack' || action.phase !== 'accepted') return;
+        if (playerHand[cardKey].isRevealed === true) return;
 
         await update(ref(db, `lobbies/${code}/${role}/hand/${cardKey}`), { isRevealed: true });
         await set(ref(db, `lobbies/${code}/action/phase`), 'none');
         await set(ref(db, `lobbies/${code}/action/card`), 'none');
         await set(ref(db, `lobbies/${code}/turn`), role);
     }
-    async function handleChallengeSuccess(cardKey) {
+
+    async function replaceActive(cardKey) {
+        let active = active1 === null ? 'active1' : 'active2';
+        let replacementCard = playerHand[cardKey];
+        await update(ref(db, `lobbies/${code}/${role}/${active}`), {
+            card: { isRevealed: replacementCard.isRevealed, rank: replacementCard.rank },
+            key: cardKey
+        });
+
+        if (action.phase === 'replace active success') {
+            await set(ref(db, `lobbies/${code}/turn`), opponentRole);
+        } else {
+            await set(ref(db, `lobbies/${code}/turn`), role);
+        }
         await set(ref(db, `lobbies/${code}/${role}/hand/${cardKey}`), null);
         await set(ref(db, `lobbies/${code}/action/phase`), 'none');
         await set(ref(db, `lobbies/${code}/action/card`), 'none');
-        await set(ref(db, `lobbies/${code}/turn`), opponentRole);
     }
-    async function handleChallengeFail(cardKey) {
-        await set(ref(db, `lobbies/${code}/${role}/hand/${cardKey}`), null);
-        await set(ref(db, `lobbies/${code}/action/phase`), 'none');
-        await set(ref(db, `lobbies/${code}/action/card`), 'none');
-        await set(ref(db, `lobbies/${code}/turn`), role);
+    // If your opponent makes a challenge:
+    // 1. your challenged card is revealed
+    // 2. if the challenge is successful your action doesn't go through
+    // 3. the revealed card dies
+    // 4. if possible, replace the active card with one from your hand
+    // 5. turn passes to your opponent
+    // Turn not properly changing, permissions not properly restricted
+    async function handleChallengeSuccess(active) {
+        await set(ref(db, `lobbies/${code}/${role}/${active}`), null);
+        if (playerHand.length === 0) {
+            await set(ref(db, `lobbies/${code}/action/phase`), 'none');
+            await set(ref(db, `lobbies/${code}/action/card`), 'none');
+            await set(ref(db, `lobbies/${code}/turn`), opponentRole);
+        } else {
+            await set(ref(db, `lobbies/${code}/action/phase`), 'replace active success')
+        }
+
     }
 
-    const handleJackClick = async () => {
-        await set(ref(db, `lobbies/${code}/action/card`), 'jack');
-        await set(ref(db, `lobbies/${code}/action/phase`), 'action pushed');
-        await set(ref(db, `lobbies/${code}/action/active`), activeAbility);
+    // If you make a challenge:
+    // 1. challenged card is revealed
+    // 2. if you fail, action goes through
+    // 3. you pick an active card to die
+    // 4. if able, you replace the active card with on from your hand
+    // 5. revealed card may be replaced by opponent
+    // 6. turn passes to you
+    // Turn not properly changing, permissions not properly restricted
+    async function handleChallengeFail(active) {
+        await set(ref(db, `lobbies/${code}/${role}/${active}`), null);
+        if (playerHand.length === 0) {
+            await set(ref(db, `lobbies/${code}/action/phase`), 'none');
+            await set(ref(db, `lobbies/${code}/action/card`), 'none');
+            await set(ref(db, `lobbies/${code}/turn`), role);
+            return;
+        } else {
+            await set(ref(db, `lobbies/${code}/action/phase`), 'replace active fail');
+        }
     }
 
-    const handleQueenClick = async () => {
-        await set(ref(db, `lobbies/${code}/action/card`), 'queen')
-        await set(ref(db, `lobbies/${code}/action/phase`), 'action pushed')
-        await set(ref(db, `lobbies/${code}/action/active`), activeAbility);
-    }
-
-    const handleKingClick = async () => {
-        await set(ref(db, `lobbies/${code}/action/card`), 'king')
-        await set(ref(db, `lobbies/${code}/action/phase`), 'action pushed')
-        await set(ref(db, `lobbies/${code}/action/active`), activeAbility);
-    }
-
-    function handleActiveAbility() {
+    // Display the buttons to select active ability
+    function handleSelectActive() {
         return (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
-                <button style={{ height: '25px', width: '30px' }}
-                    onClick={handleJackClick}>
-                    J
-                </button>
-                <button style={{ height: '25px', width: '30px' }}
-                    onClick={handleQueenClick}>
-                    Q
-                </button>
-                <button style={{ height: '25px', width: '30px' }}
-                    onClick={handleKingClick}>
-                    K
-                </button>
-            </div>
+            <ActionButton code={code} selectActive={selectActive} />
         )
     }
 
+    // Handles hand click when action phase is none
     const handleHandClick = (cardKey) => {
         if (turn !== role || action.phase !== 'none') {
             return;
         }
         setSelectedCardKey(prevKey => prevKey === cardKey ? null : cardKey);
-        setActiveAbility(null);
+        setSelectActive(null);
     }
 
+    // Handles active click when action phase is none
     const handleActiveClick = (active) => {
         if (turn !== role || action.phase !== 'none') {
             return;
@@ -164,20 +184,17 @@ function GamePhase({ code, role, opponentRole, playerHand: remotePlayerHand, act
             handleSwap(active);
         }
         else {
-            setActiveAbility(activeKey => activeKey === active ? null : active);
+            setSelectActive(activeKey => activeKey === active ? null : active);
         }
     }
 
+    // Displays player's hand, conditionally changes the click function depending on action phase
     function displayPlayerHand() {
         let handClick = null;
         if (turn === opponentRole && action.phase === 'accepted' && action.card === 'jack') {
             handClick = handleJackReveal
-        }
-        else if (turn === role && action.phase === 'challenge success') {
-            handClick = handleChallengeSuccess
-        }
-        else if (turn === opponentRole && action.phase === 'challenge fail') {
-            handClick = handleChallengeFail
+        } else if (action.phase === 'replace active success' || action.phase === 'replace active fail') {
+            handClick = replaceActive
         }
         else {
             handClick = handleHandClick
@@ -193,6 +210,7 @@ function GamePhase({ code, role, opponentRole, playerHand: remotePlayerHand, act
         )
     }
 
+    // Displays opponent's hand, no click functionality
     function displayOpponentHand() {
         return (
             <Hand
@@ -203,27 +221,60 @@ function GamePhase({ code, role, opponentRole, playerHand: remotePlayerHand, act
         )
     }
 
+    // Display's player's active cards, conditionally changes click functionality depending on action phase
+    let activeClick = null;
+    if (turn === role && action.phase === 'challenge success') {
+        activeClick = handleChallengeSuccess;
+    } else if (turn === opponentRole && action.phase === 'challenge fail') {
+        activeClick = handleChallengeFail;
+    } else {
+        activeClick = handleActiveClick;
+    }
     function displayActiveCards() {
         return (
-            <div style={{ display: 'flex', gap: '10px', justifyContent: 'center', paddingBottom: '10px' }}>
-                {activeAbility === 'active1' && turn === role && handleActiveAbility()}
-                <Card
-                    ownerRole={role}
-                    playerRole={role}
-                    card={active1?.card}
-                    handleCardClick={() => handleActiveClick('active1')}
-                />
-                <Card
-                    ownerRole={role}
-                    playerRole={role}
-                    card={active2?.card}
-                    handleCardClick={() => handleActiveClick('active2')}
-                />
-                {activeAbility === 'active2' && turn === role && handleActiveAbility()}
+            <div style={{ display: 'flex', justifyContent: 'center', position: 'relative' }}>
+                <div style={{ display: 'flex', gap: '10px', justifyContent: 'center', position: 'relative', paddingBottom: '10px' }}>
+                    <Card
+                        ownerRole={role}
+                        playerRole={role}
+                        card={active1?.card}
+                        handleCardClick={() => activeClick('active1')}
+                    />
+                    <Card
+                        ownerRole={role}
+                        playerRole={role}
+                        card={active2?.card}
+                        handleCardClick={() => activeClick('active2')}
+                    />
+                    {selectActive === 'active1' && turn === role && (
+                        <div style={{
+                            position: 'absolute',
+                            right: '100%',
+                            marginRight: '10px',
+                            top: '50%',
+                            transform: 'translateY(-50%)'
+                        }}>
+                            {handleSelectActive()}
+                        </div>
+                    )}
+
+                    {selectActive === 'active2' && turn === role && (
+                        <div style={{
+                            position: 'absolute',
+                            left: '100%',
+                            marginLeft: '10px',
+                            top: '50%',
+                            transform: 'translateY(-50%)',
+                        }}>
+                            {handleSelectActive()}
+                        </div>
+                    )}
+                </div>
             </div>
         )
     }
 
+    // Display opponent's active cards, no click functionality
     function displayOpponentActiveCards() {
         return (
             <div style={{ display: 'flex', gap: '10px', justifyContent: 'center', paddingBottom: '10px' }}>
@@ -231,41 +282,47 @@ function GamePhase({ code, role, opponentRole, playerHand: remotePlayerHand, act
                     ownerRole={opponentRole}
                     playerRole={role}
                     card={opponentActive1?.card}
-                    selected={action.phase === 'action pushed' && turn === opponentRole && activeAbility === 'active1'}
+                    selected={action.phase === 'action pushed' && turn === opponentRole && selectActive === 'active1'}
                 />
                 <Card
                     ownerRole={opponentRole}
                     playerRole={role}
                     card={opponentActive2?.card}
-                    selected={action.phase === 'action pushed' && turn === opponentRole && activeAbility === 'active2'}
+                    selected={action.phase === 'action pushed' && turn === opponentRole && selectActive === 'active2'}
                 />
             </div>
         )
     }
 
+    // Display challenge prompt or challenge status
     function displayChallengePrompt() {
         return (
             <div style={{ display: 'flex', justifyContent: 'center' }}>
                 {(action.phase === 'action pushed' && turn === opponentRole) && <ChallengePrompt action={action} code={code} role={role} opponentHand={opponentHand} opponentActive1={opponentActive1} opponentActive2={opponentActive2} />}
-                {(action.phase === 'accepted' && action.card === 'jack' && turn === opponentRole) && <p>Choose a card from your hand to reveal</p>}
+                {(action.phase === 'accepted' && action.card === 'jack' && turn === opponentRole) && <p>Choose an unrevealed card from your hand to reveal</p>}
+                {(action.phase === 'accepted' && action.card === 'jack' && turn === role) && <p>Waiting for opponent to reveal</p>}
             </div>
         )
     }
 
+    // Displays information when challenge fails depending on role
     function displayChallengeFail() {
         return (
             <div style={{ display: 'flex', justifyContent: 'center' }}>
-                {(action.phase === 'challenge fail' && turn === opponentRole) && <p>Challenge Failed, choose card to kill</p>}
-                {(action.phase === 'challenge fail' && turn === role) && <p>Opponent challenged, waiting for them to kill a card</p>}
+                {(action.phase === 'challenge fail' && turn === opponentRole) && <p>Challenge Failed, choose an active card to destroy</p>}
+                {(action.phase === 'replace active fail' && turn === opponentRole) && <p>choose a card from your hand to replace the active card</p>}
+                {(action.phase === 'challenge fail' && turn === role) && <p>Opponent challenged, waiting for them to destroy an active card</p>}
             </div>
         )
     }
 
+    // Displays information when challenge suceeds depending on role
     function displayChallengeSuccess() {
         return (
             <div style={{ display: 'flex', justifyContent: 'center' }}>
-                {(action.phase === 'challenge success' && turn === role) && <p>You were Challenged, choose card to kill</p>}
-                {(action.phase === 'challenge success' && turn === opponentRole) && <p>Challenge successful, waiting for opponent to kill a card</p>}
+                {(action.phase === 'challenge success' && turn === role) && <p>You were Challenged, choose card to destroy</p>}
+                {(action.phase === 'replace active success' && turn === role) && <p>choose a card from your hand to replace the active card</p>}
+                {(action.phase === 'challenge success' && turn === opponentRole) && <p>Challenge successful, waiting for opponent to destroy a card</p>}
             </div>
         )
     }
@@ -273,6 +330,8 @@ function GamePhase({ code, role, opponentRole, playerHand: remotePlayerHand, act
     return (
         <div>
             <p>Turn: {turn}</p>
+            <p>action phase: {action.phase}</p>
+
             {displayOpponentHand()}
             {displayOpponentActiveCards()}
             {displayActiveCards()}

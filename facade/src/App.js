@@ -10,7 +10,7 @@ function Home({ user }) {
   const navigate = useNavigate();
 
   // Generates a random 8-character lobby code
-  const generateCode = () => {
+  function generateCode() {
     const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
     let code = '';
     for (let i = 0; i < 8; i++) {
@@ -20,7 +20,7 @@ function Home({ user }) {
   }
 
   // Handles creating a new lobby
-  const handleCreateLobby = async () => {
+  async function handleCreateLobby() {
     let code;
     let attempts = 0;
     let maxAttempts = 10;
@@ -40,7 +40,7 @@ function Home({ user }) {
   }
 
   // Handles joining an existing lobby
-  const handleJoinLobby = async () => {
+  async function handleJoinLobby() {
     const cleaned = codeInput.trim().toUpperCase();
     const lobbyRef = ref(db, `lobbies/${cleaned}`);
     const snapshot = await get(lobbyRef);
