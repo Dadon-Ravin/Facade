@@ -2,36 +2,7 @@ import { useState, useEffect } from 'react';
 import { ref, update } from 'firebase/database';
 import { db } from '../firebase';
 import Hand from './Hand';
-
-function Slot({ card, role, onClick }) {
-    const color = role === 'host' ? 'red' : 'black'
-    return (
-        <div
-            onClick={onClick}
-            style={{
-                width: "90px",
-                height: "120px",
-                border: "2px dashed gray",
-                borderRadius: "8px",
-                display: "flex",
-                justifyContent: "center",
-                alignItems: "center",
-                backgroundColor: card ? "#eee" : "transparent",
-                cursor: "pointer",
-            }}
-        >
-            {card ? (
-                <img
-                    src={`/cards/${color}/${color}_${card.rank}.svg`}
-                    alt={`${role === 'host' ? 'red' : 'black'} ${card.rank}`}
-                    style={{ width: '100px', height: 'auto' }}
-                />
-            ) : (
-                "+"
-            )}
-        </div>
-    );
-}
+import Slot from './Slot';
 
 function SelectionPhase({ code, role, hand: remoteHand, active1: remoteActive1 = null, active2: remoteActive2 = null, selectionSubmitted }) {
     // Locate state for slots and hand
