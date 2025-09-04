@@ -25,7 +25,7 @@ function SelectionPhase({ code, role, hand: remoteHand, active1: remoteActive1 =
     }, [remoteActive2]);
 
     const handleCardClick = (cardKey) => {
-        setSelectedCardKey(cardKey);
+        setSelectedCardKey(prevKey => prevKey === cardKey ? null : cardKey);
     };
 
     const handleSlotClick = async (slot) => {
@@ -33,6 +33,7 @@ function SelectionPhase({ code, role, hand: remoteHand, active1: remoteActive1 =
 
         const selectedCard = hand[selectedCardKey];
         if (!selectedCard) return;
+
 
         // Determine card in selected slot
         const currentSlot = slot === 'active1' ? active1 : active2;

@@ -51,7 +51,8 @@ function ChallengePrompt({ code, action, role, opponentHand, opponentActive1, op
         <div style={{
             justifyContent: 'center', border: "2px solid black", height: '100px', width: '350px'
         }}>
-            <p style={{ display: 'flex', justifyContent: 'center' }}>Your opponent is attempting to use {action.active} as a {action.card}</p>
+            {(action.card === 'jack' || action.card === 'queen') && <p style={{ display: 'flex', justifyContent: 'center' }}>Your opponent is attempting to use {action.active} as a {action.card}</p>}
+            {(action.card === 'active1' || action.card === 'active2') && <p style={{ display: 'flex', justifyContent: 'center' }}>Your opponent is attempting to use {action.active} as a king on your {action.card}</p>}
             <div style={{ display: 'flex', justifyContent: 'center', gap: '10px' }}>
                 <button onClick={action.card === 'queen' ? handleQueenAccept : handleAccept}>Accept</button>
                 <button onClick={handleChallenge}>Challenge</button>
