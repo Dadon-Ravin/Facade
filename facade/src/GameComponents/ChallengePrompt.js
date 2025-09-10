@@ -48,14 +48,12 @@ function ChallengePrompt({ code, action, role, opponentHand, opponentActive1, op
 
     // Return button prompt for accepting or challenging an opponent action
     return (
-        <div style={{
-            justifyContent: 'center', border: "2px solid black", height: '100px', width: '350px'
-        }}>
-            {(action.card === 'jack' || action.card === 'queen') && <p style={{ display: 'flex', justifyContent: 'center' }}>Your opponent is attempting to use {action.active} as a {action.card}</p>}
-            {(action.card === 'active1' || action.card === 'active2') && <p style={{ display: 'flex', justifyContent: 'center' }}>Your opponent is attempting to use {action.active} as a king on your {action.card}</p>}
+        <div className='prompt'>
+            {(action.card === 'jack' || action.card === 'queen') && <b className='prompt-text'>Your opponent is attempting to use {action.active} as a {action.card}</b>}
+            {(action.card === 'active1' || action.card === 'active2') && <b className='prompt-text'>Your opponent is attempting to use {action.active} as a king on your {action.card}</b>}
             <div style={{ display: 'flex', justifyContent: 'center', gap: '10px' }}>
-                <button onClick={action.card === 'queen' ? handleQueenAccept : handleAccept}>Accept</button>
-                <button onClick={handleChallenge}>Challenge</button>
+                <button className='submit-button' onClick={action.card === 'queen' ? handleQueenAccept : handleAccept}>Accept</button>
+                <button className='submit-button' onClick={handleChallenge}>Challenge</button>
             </div>
         </div>
     )

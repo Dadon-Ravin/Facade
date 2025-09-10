@@ -341,10 +341,24 @@ function GamePhase({ code, role, opponentRole, playerHand: remotePlayerHand, act
     // Display challenge prompt or challenge status
     function displayChallengePrompt() {
         return (
-            <div style={{ display: 'flex', justifyContent: 'center' }}>
+            <div>
                 {(action.phase === 'action pushed' && turn === opponentRole && action.card !== 'king') && <ChallengePrompt action={action} code={code} role={role} opponentHand={opponentHand} opponentActive1={opponentActive1} opponentActive2={opponentActive2} />}
-                {(action.phase === 'accepted' && action.card === 'jack' && turn === opponentRole) && <p>Choose an unrevealed card from your hand to reveal</p>}
-                {(action.phase === 'accepted' && action.card === 'jack' && turn === role) && <p>Waiting for opponent to reveal</p>}
+            </div>
+        )
+    }
+
+    function displayJackPrompt() {
+        return (
+            (action.phase === 'accepted' && action.card === 'jack' && turn === opponentRole) &&
+            <div className='prompt'>
+                <p>Choose an unrevealed card from your hand to reveal</p>
+            </div>
+            ||
+
+            (action.phase === 'accepted' && action.card === 'jack' && turn === role) &&
+            <div className='prompt'>
+
+                <p>Waiting for opponent to reveal</p>
             </div>
         )
     }
@@ -352,22 +366,49 @@ function GamePhase({ code, role, opponentRole, playerHand: remotePlayerHand, act
     // Displays information when challenge fails depending on role
     function displayChallengeFail() {
         return (
-            <div style={{ display: 'flex', justifyContent: 'center' }}>
-                {(action.phase === 'challenge fail' && turn === opponentRole) && <p>Challenge Failed, choose an active card to destroy</p>}
-                {(action.phase === 'replace active fail' && turn === opponentRole) && <p>choose a card from your hand to replace the active card</p>}
-                {(action.phase === 'challenge fail' && turn === role) && <p>Opponent challenged, waiting for them to destroy an active card</p>}
+            (turn === 'dd') &&
+            (action.phase === 'challenge fail' && turn === opponentRole) &&
+            <div className='prompt'>
+                <b className='prompt-text'>Challenge Failed, choose an active card to destroy</b>
             </div>
+            ||
+
+            (action.phase === 'replace active fail' && turn === opponentRole) &&
+            <div className='prompt'>
+                <b className='prompt-text'>choose a card from your hand to replace the active card</b>
+            </div>
+            ||
+
+            (action.phase === 'challenge fail' && turn === role) &&
+            <div className='prompt'>
+                <b className='prompt-text'>Opponent challenged, waiting for them to destroy an active card</b>
+            </div>
+
         )
     }
 
     // Displays information when challenge suceeds depending on role
     function displayChallengeSuccess() {
         return (
-            <div style={{ display: 'flex', justifyContent: 'center' }}>
-                {(action.phase === 'challenge success' && turn === role) && <p>You were Challenged, choose a card from your hand to replace your challenged card</p>}
-                {(action.phase === 'replace active success' && turn === role) && <p>choose a card from your hand to replace the active card</p>}
-                {(action.phase === 'challenge success' && turn === opponentRole) && <p>Challenge successful, waiting for opponent to replace active card</p>}
+            (turn === 'dd') &&
+            (action.phase === 'challenge success' && turn === role) &&
+            <div className='prompt'>
+                <b className='prompt-text'>You were Challenged, choose a card from your hand to replace your challenged card</b>
             </div>
+            ||
+
+            (action.phase === 'replace active success' && turn === role) &&
+            <div className='prompt'>
+                <b className='prompt-text'>choose a card from your hand to replace the active card</b>
+            </div>
+            ||
+
+            (action.phase === 'challenge success' && turn === opponentRole) &&
+            <div className='prompt'>
+                <b className='prompt-text'>Challenge successful, waiting for opponent to replace active card</b>
+            </div>
+
+
         )
     }
 
@@ -378,6 +419,7 @@ function GamePhase({ code, role, opponentRole, playerHand: remotePlayerHand, act
             {displayActiveCards()}
             {displayPlayerHand()}
             {displayKingPrompt()}
+            {displayJackPrompt()}
             {displayChallengePrompt()}
             {displayChallengeFail()}
             {displayChallengeSuccess()}
