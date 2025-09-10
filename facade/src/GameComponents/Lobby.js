@@ -21,6 +21,8 @@ function Lobby({ user }) {
                 card3: { rank: 'queen', isRevealed: false },
                 card4: { rank: 'jack', isRevealed: false },
                 card6: { rank: 'joker', isRevealed: false },
+                card7: { rank: 'joker', isRevealed: false },
+
             }
 
             await Promise.all([
@@ -57,7 +59,7 @@ function Lobby({ user }) {
                     }
                 });
                 setRole('host');
-                setStatus('wating');
+                setStatus('waiting');
                 return;
             }
 
@@ -118,7 +120,7 @@ function Lobby({ user }) {
                     style={{ fontSize: '1.5em', padding: '30px 0px 20px' }}
                 >Waiting for opponent to join...</p>}
             </div>}
-            {(status === 'selection' || 'started') && <GameBoard code={code} role={role} />}
+            {(status === 'selection' || status === 'started') && <GameBoard code={code} role={role} />}
         </div>
     );
 }
