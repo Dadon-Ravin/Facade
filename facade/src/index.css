@@ -1,0 +1,204 @@
+html,
+body,
+#root {
+    height: 100%;
+    margin: 0;
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+body {
+    height: 100%;
+    width: 100%;
+    background:
+        linear-gradient(to right, rgba(0, 0, 0, 0.603), #940b228b),
+        conic-gradient(#333 90deg,
+            #e35d5d 90deg 180deg,
+            #333 180deg 270deg,
+            #e35d5d 270deg);
+    background-repeat: repeat;
+    background-size: auto, 150px 150px;
+    background-position: center;
+}
+
+.container {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.title {
+    font-family: 'sans-serif';
+    font-style: italic;
+    font-weight: bold;
+    font-size: 5em;
+    text-align: center;
+    margin: 0;
+    padding-bottom: 50px;
+}
+
+.menu-button {
+    background-color: #fefefe;
+    border-style: none;
+    color: rgb(0, 0, 0);
+    padding: 20px 32px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    margin: 4px 2px;
+    cursor: pointer;
+    border-radius: 12px;
+    filter: drop-shadow(10px 10px 0px rgba(0, 0, 0, 0.281));
+
+    font-weight: bold;
+    font-size: 1em;
+    text-align: center;
+    margin: 0;
+}
+
+.menu-button:hover {
+    background-color: #511414;
+    color: rgb(255, 255, 255);
+}
+
+.main-menu {
+    justify-content: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+}
+
+.lobby-input {
+    padding: 10px;
+    font-size: 1em;
+    border-radius: 5px;
+    border: none;
+    width: 200px;
+    text-align: left;
+    filter: drop-shadow(10px 10px 0px rgba(0, 0, 0, 0.281));
+}
+
+.lobby {
+    width: 500px;
+    height: '50%';
+    align-self: center;
+    border-radius: 15px;
+    border-style: solid;
+    border-color: rgb(255, 255, 255);
+
+
+    line-height: 10%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background-color: #000000d7;
+}
+
+.lobby-info {
+    font-size: 2em;
+    text-align: center;
+    color: white;
+}
+
+.selection-phase {
+    width: 800px;
+    height: '100%';
+    align-self: center;
+    border-radius: 15px;
+    border-style: solid;
+    border-color: rgb(255, 255, 255);
+    padding: 20px;
+
+    line-height: 10%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background-color: #000000d7;
+}
+
+.gameboard {
+    width: 800px;
+    height: 800px;
+    align-self: center;
+    border-radius: 15px;
+    border-style: solid;
+    border-color: rgb(255, 255, 255);
+    padding: 20px;
+
+    line-height: 10%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background-color: #000000d7;
+}
+
+.submit-button {
+    background-color: #fefefe;
+    border-style: none;
+    color: rgb(0, 0, 0);
+    padding: 10px 20px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    margin: 4px 2px;
+    cursor: pointer;
+    border-radius: 12px;
+
+    font-weight: bold;
+    font-size: 1em;
+    text-align: center;
+    margin: 0;
+}
+
+.submit-button:disabled {
+    background-color: gray;
+    color: rgb(200, 200, 200);
+    cursor: not-allowed;
+}
+
+.submit-button:hover:enabled {
+    background-color: #511414;
+    color: rgb(255, 255, 255);
+}
+
+.action-button {
+    background-color: #fefefe;
+    border-style: none;
+    color: rgb(0, 0, 0);
+    padding: 10px 20px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    cursor: pointer;
+    border-radius: 8px;
+
+    font-weight: bold;
+    font-size: 1em;
+    text-align: center;
+}
+
+.action-button:hover {
+    background-color: #511414;
+    color: rgb(255, 255, 255);
+}
+
+.circle-wait {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    border: 8px solid;
+    border-color: #ffffff transparent #ffffff transparent;
+    display: inline-block;
+    animation: l1 1s linear infinite;
+}
+
+@keyframes l1 {
+    to {
+        transform: rotate(.5turn);
+    }
+}

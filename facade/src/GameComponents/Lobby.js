@@ -20,7 +20,6 @@ function Lobby({ user }) {
                 card2: { rank: 'king', isRevealed: false },
                 card3: { rank: 'queen', isRevealed: false },
                 card4: { rank: 'jack', isRevealed: false },
-                card5: { rank: 'joker', isRevealed: false },
                 card6: { rank: 'joker', isRevealed: false },
             }
 
@@ -111,12 +110,15 @@ function Lobby({ user }) {
     }
 
     return (
-        <div style={{ padding: 20 }}>
-            <h2>Lobby Code: {code}</h2>
-            <p>Status: {status}</p>
-            <p>You are the {role}</p>
+        <div className='container'>
+            {status === 'waiting' && <div className='lobby'>
+                <p className='lobby-info' style={{ padding: '20px 0px 30px 0px' }}>Lobby Code: <b><b>{code}</b></b></p>
+                <div className='circle-wait'></div>
+                {status === 'waiting' && role === 'host' && <p className='lobby-info'
+                    style={{ fontSize: '1.5em', padding: '30px 0px 20px' }}
+                >Waiting for opponent to join...</p>}
+            </div>}
             {(status === 'selection' || 'started') && <GameBoard code={code} role={role} />}
-            {status === 'waiting' && role === 'host' && <p>Waiting for guest to join...</p>}
         </div>
     );
 }

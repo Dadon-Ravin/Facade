@@ -77,8 +77,8 @@ function SelectionPhase({ code, role, hand: remoteHand, active1: remoteActive1 =
 
     return (
         <div style={{ textAlign: 'center' }}>
-            <h3>Selection Phase</h3>
-            <div style={{ display: 'flex', justifyContent: 'center', gap: '10px' }}>
+            <h2 className='lobby-info' style={{ paddingBottom: '20px' }}>Selection Phase</h2>
+            <div style={{ display: 'flex', justifyContent: 'center', gap: '15px', paddingBottom: '20px' }}>
                 <Slot card={active1?.card} role={role} onClick={() => handleSlotClick("active1")} />
                 <Slot card={active2?.card} role={role} onClick={() => handleSlotClick("active2")} />
             </div>
@@ -90,7 +90,7 @@ function SelectionPhase({ code, role, hand: remoteHand, active1: remoteActive1 =
                 selectedCardKey={selectedCardKey}
                 handleCardClick={handleCardClick}
             />
-            <button
+            <button className='submit-button'
                 onClick={handleSubmit}
                 disabled={!bothSlotsFilled || selectionSubmitted}
             >

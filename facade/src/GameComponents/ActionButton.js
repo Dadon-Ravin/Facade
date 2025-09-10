@@ -30,17 +30,17 @@ function ActionButton({ code, selectActive }) {
     return (
 
         <div style={{ display: 'flex', justifyContent: 'center', flexDirection: 'column' }}>
-            <button style={{ height: '25px', width: '30px' }}
+            <button className='action-button'
                 onClick={handleJackClick}
             >
                 J
             </button>
-            <button style={{ height: '25px', width: '30px' }}
+            <button className='action-button'
                 onClick={handleQueenClick}
             >
                 Q
             </button>
-            <button style={{ height: '25px', width: '30px' }}
+            <button className='action-button'
                 onClick={handleKingClick}
             >
                 K

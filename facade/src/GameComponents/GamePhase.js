@@ -373,9 +373,6 @@ function GamePhase({ code, role, opponentRole, playerHand: remotePlayerHand, act
 
     return (
         <div>
-            <p>Turn: {turn}</p>
-            <p>action phase: {action.phase}</p>
-
             {displayOpponentHand()}
             {displayOpponentActiveCards()}
             {displayActiveCards()}

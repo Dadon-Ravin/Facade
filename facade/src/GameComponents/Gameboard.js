@@ -85,18 +85,20 @@ function GameBoard({ code, role }) {
 
     if (status === 'selection') {
         return (
-            <SelectionPhase
-                code={code}
-                role={role}
-                hand={playerHand}
-                active1={active1}
-                active2={active2}
-                selectionSubmitted={playerSelectionSubmitted}
-            />
+            <div className='selection-phase'>
+                <SelectionPhase
+                    code={code}
+                    role={role}
+                    hand={playerHand}
+                    active1={active1}
+                    active2={active2}
+                    selectionSubmitted={playerSelectionSubmitted}
+                />
+            </div>
         )
     }
     return (
-        <div style={{ marginTop: 20 }}>
+        <div className='gameboard'>
             <GamePhase
                 code={code}
                 role={role}

@@ -20,7 +20,7 @@ function Card({ ownerRole, playerRole, card, selected = false, handleCardClick =
                 style={{
                     width: '100px',
                     height: 'auto',
-                    ...(selected && { boxShadow: '0 0 10px 1px gold' })
+                    ...(selected && { filter: 'drop-shadow(0 0 12px gold)' })
                 }}
                 onClick={() => handleCardClick?.()}
             />

@@ -4,6 +4,7 @@ import { auth, db } from './firebase';
 import { signInAnonymously, onAuthStateChanged } from 'firebase/auth';
 import { ref, get } from 'firebase/database';
 import Lobby from './GameComponents/Lobby';
+import './index.css';
 
 function Home({ user }) {
   const [codeInput, setCodeInput] = useState('');
@@ -53,16 +54,34 @@ function Home({ user }) {
   }
 
   return (
-    <div style={{ padding: 20 }}>
-      <h2>Lobby System</h2>
-      <button onClick={handleCreateLobby}>Create Lobby</button>
-      <div style={{ marginTop: 20 }}>
-        <input
+    <div className='main-menu'>
+      <title>Facade</title>
+      <img
+        src='/title.svg'
+        alt='facade'
+        style={{
+          width: '50%',
+          height: 'auto',
+          padding: 50,
+          paddingBottom: 100,
+          filter: 'drop-shadow(10px 10px 0px #1c1c1cae)',
+        }}
+      />
+      <button className='menu-button' onClick={handleCreateLobby}>Create Lobby</button>
+      <div style={{ marginTop: 20, display: 'flex', alignItems: 'center', position: 'relative' }}>
+        <input className='lobby-input'
           value={codeInput}
           onChange={(e) => setCodeInput(e.target.value)}
-          placeholder="Enter Lobby Code"
+          placeholder="  Enter Lobby Code"
         />
-        <button onClick={handleJoinLobby} style={{ marginLeft: 10 }}>
+        <button className='menu-button' style={{
+          width: '128px',
+          padding: '10px 20px',
+          position: 'absolute',
+          left: '100%',
+          marginLeft: '20px',
+        }}
+          onClick={handleJoinLobby}>
           Join Lobby
         </button>
       </div>

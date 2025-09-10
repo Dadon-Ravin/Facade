@@ -6,12 +6,12 @@ function Slot({ card, role, onClick }) {
             style={{
                 width: "90px",
                 height: "120px",
-                border: "2px dashed gray",
+                border: "2px white dashed",
                 borderRadius: "8px",
                 display: "flex",
                 justifyContent: "center",
                 alignItems: "center",
-                backgroundColor: card ? "#eee" : "transparent",
+                backgroundColor: "transparent",
                 cursor: "pointer",
             }}
         >
@@ -22,7 +22,7 @@ function Slot({ card, role, onClick }) {
                     style={{ width: '100px', height: 'auto' }}
                 />
             ) : (
-                "+"
+                <p style={{ fontSize: '2em', color: 'white' }}>+</p>
             )}
         </div>
     );
