@@ -105,7 +105,7 @@ function App() {
   }, []);
 
   if (!user) {
-    return <div>Loading...</div>;
+    return <b className='prompt-text'>Loading...</b>;
   }
 
   return (

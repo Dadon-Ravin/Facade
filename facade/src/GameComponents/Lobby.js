@@ -108,7 +108,7 @@ function Lobby({ user }) {
         return <div>Lobby is full</div>;
     }
     if (status === 'joining') {
-        return <div>Joining lobby...</div>;
+        return <b className='prompt-text'>Joining lobby...</b>;
     }
 
     return (

@@ -121,13 +121,14 @@ body {
 }
 
 .gameboard {
-    width: 800px;
-    height: 800px;
+    width: 600px;
+    height: 650px;
     align-self: center;
     border-radius: 15px;
     border-style: solid;
     border-color: rgb(255, 255, 255);
     padding: 20px;
+    margin-bottom: 100px;
 
     line-height: 10%;
     display: flex;
@@ -194,7 +195,8 @@ body {
     gap: 20px;
     justify-content: center;
     border: 3px solid white;
-    border-radius: 10px
+    border-radius: 10px;
+    background-color: #000000d7;
 }
 
 .prompt-text {

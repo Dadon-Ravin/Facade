@@ -98,7 +98,7 @@ function GameBoard({ code, role }) {
         )
     }
     return (
-        <div className='gameboard'>
+        <div>
             <GamePhase
                 code={code}
                 role={role}
